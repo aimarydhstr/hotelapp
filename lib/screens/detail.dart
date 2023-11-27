@@ -10,9 +10,13 @@ class HotelDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formattedPrice = formatRupiah(hotel.price);
     return Scaffold(
       appBar: AppBar(
-        title: Text(hotel.name),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Colors.black, // Change back button color to black
+        ),// Change background color to white
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,11 +38,11 @@ class HotelDetail extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.yellow),
+                    Icon(Icons.star, color: Colors.orangeAccent),
                     Text(hotel.rating.toString()),
                   ],
                 ),
-                Text('Price: \$${hotel.price} per night'),
+                Text('Rp. ${formattedPrice}'),
                 Text('Location: ${hotel.location}'),
                 SizedBox(height: 16),
                 ElevatedButton(
@@ -54,5 +58,13 @@ class HotelDetail extends StatelessWidget {
         ],
       ),
     );
+  }
+  String formatRupiah(int amount) {
+    // Format the number as Rupiah without using external library
+    String formattedAmount = amount.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'
+    );
+
+    return formattedAmount;
   }
 }

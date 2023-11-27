@@ -10,6 +10,7 @@ class HotelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formattedPrice = formatRupiah(hotel.price);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -26,7 +27,7 @@ class HotelCard extends StatelessWidget {
             Image.network(
               hotel.imageUrl,
               fit: BoxFit.cover,
-              height: 200, // Atur tinggi sesuai kebutuhan Anda
+              height: 200,
               width: double.infinity,
             ),
             Padding(
@@ -40,12 +41,12 @@ class HotelCard extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.yellow),
+                      Icon(Icons.star, color: Colors.orangeAccent),
                       Text(hotel.rating.toString()),
                     ],
                   ),
-                  Text('Price: \$${hotel.price} per night'),
-                  Text('Location: ${hotel.location}'),
+                  Text('Rp. ${formattedPrice}'),
+                  Text('${hotel.location}'),
                 ],
               ),
             ),
@@ -53,5 +54,13 @@ class HotelCard extends StatelessWidget {
         ),
       ),
     );
+  }
+  String formatRupiah(int amount) {
+    // Format the number as Rupiah without using external library
+    String formattedAmount = amount.toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'
+    );
+
+    return formattedAmount;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'hotelcard.dart'; // Import widget HotelCard
+import 'package:carousel_slider/carousel_slider.dart';
+import 'hotelcard.dart';
 import 'hotel.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,29 +20,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: isSearchBarVisible
             ? TextField(
           controller: searchController,
           decoration: InputDecoration(
             hintText: 'Search hotels...',
             hintStyle: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
             ),
             border: InputBorder.none,
           ),
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
           ),
         )
-            : Text('Hotel List'),
+            : Text(
+          'HotelApp',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: Icon(Icons.search, color: Colors.black),
             onPressed: () {
               setState(() {
                 isSearchBarVisible = !isSearchBarVisible;
                 if (!isSearchBarVisible) {
-                  // Clear search when closing search bar
                   searchController.clear();
                 }
               });
@@ -51,9 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0)
-          ),
           Expanded(
             child: ListView.builder(
               itemCount: widget.hotels.length,

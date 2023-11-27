@@ -71,7 +71,7 @@ class MyLogin extends StatelessWidget {
                 onPressed: () {
                   // Perform login here
                   // Navigasi ke halaman dashboard dengan menggunakan "/dashboard"
-                  Navigator.of(context).pushNamed('/dashboard');
+                  Navigator.of(context).pushNamed('/home');
                 },
               ),
             ),
@@ -98,7 +98,7 @@ class MyLogin extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      // Perform login with Google here
+                      Navigator.of(context).pushNamed('/home');
                     },
                   ),
                 ),
@@ -114,7 +114,7 @@ class MyLogin extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    // Perform login with Facebook here
+                    Navigator.of(context).pushNamed('/home');
                   },
                 ),
               ],
