@@ -16,7 +16,7 @@ class HotelDetail extends StatelessWidget {
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(
           color: Colors.black, // Change back button color to black
-        ),// Change background color to white
+        ), // Change background color to white
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,11 +59,11 @@ class HotelDetail extends StatelessWidget {
       ),
     );
   }
+
   String formatRupiah(int amount) {
     // Format the number as Rupiah without using external library
     String formattedAmount = amount.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'
-    );
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
 
     return formattedAmount;
   }

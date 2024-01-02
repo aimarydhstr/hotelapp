@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../apimanager.dart';
+import '../usermanager.dart';
+import 'package:provider/provider.dart';
 
 class MyLogin extends StatelessWidget {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _authenticate(BuildContext context) async {
+    final apiManager = Provider.of<ApiManager>(context, listen: false);
+    final userManager = Provider.of<UserManager>(context, listen: false);
+
+    final username = _usernameController.text;
+    final password = _passwordController.text;
+
+    try {
+      final token = await apiManager.authenticate(username, password);
+      userManager.setAuthToken(token);
+      Navigator.pushReplacementNamed(context, '/hotel');
+    } catch (e) {
+      print('Authentication failed. Error: $e');
+      // Handle authentication failure
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,12 +53,13 @@ class MyLogin extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
               child: TextField(
+                controller: _usernameController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Email',
+                  hintText: 'Username',
                   hintStyle: TextStyle(color: Colors.white),
                   icon: Icon(
-                    Icons.email,
+                    Icons.verified_user,
                     color: Colors.white,
                   ),
                 ),
@@ -44,6 +68,7 @@ class MyLogin extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
               child: TextField(
+                controller: _passwordController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Password',
@@ -68,11 +93,7 @@ class MyLogin extends StatelessWidget {
                     style: TextStyle(color: Colors.blue, fontSize: 18.0),
                   ),
                 ),
-                onPressed: () {
-                  // Perform login here
-                  // Navigasi ke halaman dashboard dengan menggunakan "/dashboard"
-                  Navigator.of(context).pushNamed('/home');
-                },
+                onPressed: () => _authenticate(context),
               ),
             ),
             SizedBox(height: 30.0),
