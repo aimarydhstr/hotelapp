@@ -32,12 +32,18 @@ class ApiManager {
     }
   }
 
-  Future<void> register(String name, String username, String password, String repassword) async {
+  Future<void> register(
+      String name, String username, String password, String repassword) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register.php'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'name': name, 'username': username, 'password': password, 'repassword': repassword}),
+        body: jsonEncode({
+          'name': name,
+          'username': username,
+          'password': password,
+          'repassword': repassword
+        }),
       );
 
       if (response.statusCode != 200) {
@@ -48,33 +54,32 @@ class ApiManager {
     }
   }
 
-  Future<dynamic> createHotel(File image, String name, String description, String price, String location) async {
+  Future<dynamic> createHotel(File image, String name, String description,
+      String price, String location) async {
+    final token = await storage.read(key: 'auth_token');
 
-      final token = await storage.read(key: 'auth_token');
+    if (token == null) {
+      throw Exception('Token not found');
+    }
+    final uri = Uri.parse('$baseUrl/createHotel.php');
+    var request = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('image', image.path))
+      ..fields['name'] = name
+      ..fields['description'] = description
+      ..fields['price'] = price
+      ..fields['location'] = location
+      ..headers['Content-Type'] = 'application/json'
+      ..headers['Authorization'] = 'Bearer $token';
 
-      if (token == null) {
-        throw Exception('Token not found');
-      }
-      final uri = Uri.parse('$baseUrl/createHotel.php');
-      var request = http.MultipartRequest('POST', uri)
-        ..files.add(await http.MultipartFile.fromPath('image', image.path))
-        ..fields['name'] = name
-        ..fields['description'] = description
-        ..fields['price'] = price
-        ..fields['location'] = location
-        ..headers['Content-Type'] = 'application/json'
-        ..headers['Authorization'] = 'Bearer $token';
+    var response = await request.send();
+    var responseBody = await response.stream.bytesToString();
 
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(responseBody);
-        return jsonResponse['message'];
-      } else {
-        return 'Failed to upload image. Status Code: ${response.statusCode}';
-      }
-
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(responseBody);
+      return jsonResponse['message'];
+    } else {
+      return 'Failed to upload image. Status Code: ${response.statusCode}';
+    }
   }
 
   Future<List<dynamic>> getHotels() async {
@@ -86,7 +91,8 @@ class ApiManager {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to get hotels. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to get hotels. Status Code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Failed to get hotels: $e');
@@ -107,25 +113,31 @@ class ApiManager {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to get hotels. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to get hotels. Status Code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Failed to get hotels: $e');
     }
   }
 
-  Future<String> updateHotel(File image, String name, String description, String price, String location) async {
+  Future<String> updateHotel(String id, File? image, String name,
+      String description, String price, String location) async {
     try {
       final uri = Uri.parse('$baseUrl/updateHotel.php');
-      var request = http.MultipartRequest('PUT', uri)
-        ..files.add(await http.MultipartFile.fromPath('image', image.path))
+      var token = await storage.read(key: 'auth_token');
+      var request = http.MultipartRequest('POST', uri)
+        ..fields['id'] = id
         ..fields['name'] = name
         ..fields['description'] = description
         ..fields['price'] = price
-        ..fields['location'] = location;
-
-      var token = await storage.read(key: 'auth_token');
-      request.headers['Authorization'] = 'Bearer $token';
+        ..fields['location'] = location
+        ..headers['Content-Type'] = 'application/json'
+        ..headers['Authorization'] = 'Bearer $token';
+      if (image != null) {
+        request.files
+            .add(await http.MultipartFile.fromPath('image', image.path!));
+      }
 
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
@@ -134,7 +146,7 @@ class ApiManager {
         final jsonResponse = jsonDecode(responseBody);
         return jsonResponse['message'];
       } else {
-        return 'Edit data hotel gagal. Status Code: ${response.statusCode}';
+        return 'Edit data hotel gagal. Status Code: ${response}';
       }
     } catch (e) {
       return 'Error uploading image: $e';
@@ -148,19 +160,21 @@ class ApiManager {
       if (token == null) {
         throw Exception('Token not found');
       }
+
       var response = await http.delete(
         Uri.parse('$baseUrl/deleteHotel.php'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: {'id': id},
+        body: jsonEncode({'id': id}),
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return response;
       } else {
-        throw Exception('Failed to delete hotel. Status Code: ${response.statusCode}');
+        throw Exception(
+            'Failed to delete hotel. Status Code: ${response.statusCode}, Message: ${json.decode(response.body)['message']}');
       }
     } catch (e) {
       throw Exception('Failed to delete hotel: $e');

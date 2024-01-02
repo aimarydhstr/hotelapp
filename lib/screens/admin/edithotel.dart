@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'gethotel.dart';
 import '../../apimanager.dart';
 import '../../usermanager.dart';
+import 'gethotel.dart';
 
 class HotelUpdate extends StatefulWidget {
   final Hotel hotel;
@@ -39,32 +39,23 @@ class _HotelUpdateState extends State<HotelUpdate> {
   }
 
   Future<void> _updateHotel() async {
-    try {
-      final response = await http.put(
-        Uri.parse('YOUR_API_BASE_URL/updateHotel.php'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-        },
-        body: jsonEncode({
-          'id': widget.hotel.id,
-          'name': nameController.text,
-          'description': descriptionController.text,
-          'price': priceController.text,
-          'location': locationController.text,
-        }),
-      );
+    final apiManager = Provider.of<ApiManager>(context, listen: false);
+    final userManager = Provider.of<UserManager>(context, listen: false);
+    final response = await apiManager.updateHotel(
+      widget.hotel.id.toString(),
+      _image,
+      nameController.text,
+      descriptionController.text,
+      priceController.text,
+      locationController.text,
+    );
 
-      if (response.statusCode == 200) {
-        widget.onUpdate(); // Trigger the callback to refresh the list
-        Navigator.pop(context); // Close the update screen
-      } else {
-        // Handle error
-      }
-    } catch (e) {
-      print('Error updating hotel: $e');
-      // Handle error
-    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(response),
+    ));
+    widget.onUpdate();
+
+    Navigator.pop(context);
   }
 
   @override
@@ -107,10 +98,10 @@ class _HotelUpdateState extends State<HotelUpdate> {
             SizedBox(height: 16),
             _image != null
                 ? Image.file(
-              _image!,
-              height: 100,
-              width: 100,
-            )
+                    _image!,
+                    height: 100,
+                    width: 100,
+                  )
                 : Container(),
             ElevatedButton(
               onPressed: _pickImage,

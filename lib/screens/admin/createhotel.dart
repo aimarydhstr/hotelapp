@@ -45,8 +45,10 @@ class _HotelCreateState extends State<HotelCreate> {
       final price = _priceController.text;
       final location = _locationController.text;
       // Use _image instead of _imageFile
-      dynamic result = await apiManager.createHotel(_image!, name, description, price, location);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+      dynamic result = await apiManager.createHotel(
+          _image!, name, description, price, location);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(result)));
       widget.onCreate();
       Navigator.pop(context);
     } else {
@@ -85,10 +87,10 @@ class _HotelCreateState extends State<HotelCreate> {
             SizedBox(height: 16),
             _image != null
                 ? Image.file(
-              _image!,
-              height: 100,
-              width: 100,
-            )
+                    _image!,
+                    height: 100,
+                    width: 100,
+                  )
                 : Container(),
             ElevatedButton(
               onPressed: _pickImage,

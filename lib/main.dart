@@ -16,7 +16,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final ApiManager apiManager = ApiManager(baseUrl: 'http://192.168.32.128/reshotel_api');
+  final ApiManager apiManager =
+      ApiManager(baseUrl: 'http://192.168.32.41/reshotel_api');
   MyApp();
   @override
   Widget build(BuildContext context) {

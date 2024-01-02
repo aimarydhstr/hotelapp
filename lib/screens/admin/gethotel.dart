@@ -7,6 +7,7 @@ import 'createhotel.dart';
 import 'edithotel.dart';
 import '../../apimanager.dart';
 import '../../usermanager.dart';
+import 'package:intl/intl.dart';
 
 class Hotel {
   final String id;
@@ -14,6 +15,7 @@ class Hotel {
   final String description;
   final String price;
   final String location;
+  final String file_name;
 
   Hotel({
     required this.id,
@@ -21,6 +23,7 @@ class Hotel {
     required this.description,
     required this.price,
     required this.location,
+    required this.file_name,
   });
 
   factory Hotel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +33,7 @@ class Hotel {
       description: json['description'],
       price: json['price'],
       location: json['location'],
+      file_name: json['file_name'],
     );
   }
 }
@@ -69,60 +73,110 @@ class _MyHotelState extends State<MyHotel> {
       appBar: AppBar(
         title: Text('Hotel Management'),
       ),
-      body: ListView.builder(
-        itemCount: hotels.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(hotels[index].name),
-            subtitle: Text(hotels[index].location),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HotelDetails(hotel: hotels[index]),
-                ),
-              );
-            },
-            onLongPress: () {
-              // Show options for edit/delete
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Options'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HotelUpdate(
-                                  hotel: hotels[index],
-                                  onUpdate: getHotels,
-                                ),
+      body: ListView(
+        children: [
+          SizedBox(height: 16),
+          GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: hotels.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return Card(
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            HotelDetails(hotel: hotels[index]),
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Options'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HotelUpdate(
+                                        hotel: hotels[index],
+                                        onUpdate: getHotels,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Text('Edit'),
                               ),
-                            );
-                          },
-                          child: Text('Edit'),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  await apiManager
+                                      .deleteHotel(hotels[index].id.toString());
+                                  await getHotels();
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content:
+                                        Text("Data hotel berhasil dihapus"),
+                                  ));
+                                },
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: SingleChildScrollView(
+                    // Add this widget
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 1.5,
+                          child: Image.network(
+                            'http://192.168.32.41/reshotel_api/uploads/${hotels[index].file_name}',
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            await apiManager.deleteHotel(hotels[index].id);
-                          },
-                          child: Text('Delete'),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 16),
+                              Text(hotels[index].name),
+                              SizedBox(height: 5),
+                              Text('${formatCurrency(hotels[index].price)}'),
+                              SizedBox(height: 16),
+                              Text('${hotels[index].location}'),
+                              SizedBox(height: 16),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -138,4 +192,17 @@ class _MyHotelState extends State<MyHotel> {
       ),
     );
   }
+}
+
+String formatCurrency(String price) {
+  final double parsedPrice = double.parse(price);
+  final int wholeNumber = parsedPrice.toInt(); // Dapatkan bagian bilangan bulat
+
+  final currencyFormatter =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp. ');
+  String formattedPrice = currencyFormatter.format(wholeNumber);
+
+  formattedPrice = formattedPrice.replaceAll(',00', '');
+
+  return formattedPrice;
 }
